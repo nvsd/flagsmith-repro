@@ -1,11 +1,13 @@
-import flagsmith from "flagsmith";
+import flagsmith from "flagsmith/isomorphic";
 import { FlagsmithProvider } from "flagsmith/react";
+const environmentID =  "<YOUR_ENVIRONMENT_KEY>"
+function MyApp({ Component, pageProps, flagsmithState }) {
 
-function MyApp({ Component, pageProps }) {
   return (
     <FlagsmithProvider
       options={{
-        environmentID: "<YOUR_ENVIRONMENT_KEY>",
+        state:flagsmithState, // passes the initial SSR flagsmith state to prevent flickering
+        environmentID,
       }}
       flagsmith={flagsmith}
     >
@@ -13,5 +15,14 @@ function MyApp({ Component, pageProps }) {
     </FlagsmithProvider>
   );
 }
+
+
+MyApp.getInitialProps = async () => {
+    await flagsmith.init({ // fetches flags on the server
+        environmentID,
+    });
+    return { flagsmithState: flagsmith.getState() }
+}
+
 
 export default MyApp;
